@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
     public User getUser(String no) {
         return userRepository.find(no);
     }
