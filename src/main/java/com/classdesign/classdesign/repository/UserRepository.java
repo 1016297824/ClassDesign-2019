@@ -6,9 +6,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public interface UserRepository extends CustomizedRepository<User, Integer> {
+
     @Query("select u from User u where u.no=:no")
-    User find(@Param("no") String no);
+    User FindByNO(@Param("no") String no);
+
+    @Query("select u from User u where u.authority=:authority")
+    List<User> FindByAuthority(@Param("authority") String authority);
 }

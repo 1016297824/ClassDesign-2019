@@ -34,8 +34,8 @@ public class LoginController {
 
     @PostMapping("/login")
     public void login(@RequestBody User user, HttpServletResponse response) {
-        Optional.ofNullable(userService.getUser(user.getNo()))
-                .or(()->{
+        Optional.ofNullable(userService.FindByNo(user.getNo()))
+                .or(() -> {
                     throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户名不存在！");
                 })
                 .ifPresentOrElse(u -> {
@@ -43,7 +43,7 @@ public class LoginController {
                         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "密码错误！");
                     }
 
-                    Map map = Map.of("uid", u.getId(), "aid", u.getAuthority());
+                    Map map = Map.of("no", u.getNo(), "authority", u.getAuthority());
                     String token = encryptorComponent.encrypt(map);
                     response.setHeader("token", token);
 
@@ -52,8 +52,8 @@ public class LoginController {
                         role = SUPER_MANAGER_ROLE;
                     } else if (u.getAuthority() == User.Manager) {
                         role = MANAGER_ROLE;
-                    }else if (u.getAuthority()==User.Teacher){
-                        role=TEACHER_ROLE;
+                    } else if (u.getAuthority() == User.Teacher) {
+                        role = TEACHER_ROLE;
                     }
                     response.setHeader("role", role);
 

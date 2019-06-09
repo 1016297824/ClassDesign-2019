@@ -6,13 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public User getUser(String no) {
-        return userRepository.find(no);
+    public User FindByNo(String no) {
+        return userRepository.FindByNO(no);
+    }
+
+    public List<User> FindByAuthority(String authority){
+        return userRepository.FindByAuthority(authority);
     }
 }

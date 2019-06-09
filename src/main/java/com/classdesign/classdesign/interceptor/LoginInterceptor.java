@@ -22,8 +22,8 @@ public class LoginInterceptor implements HandlerInterceptor {
         Optional.ofNullable(request.getHeader("token"))
                 .ifPresentOrElse(token -> {
                     var map = encryptorComponent.decrypt(token);
-                    request.setAttribute("uid", map.get("uid"));
-                    request.setAttribute("aid", map.get("aid"));
+                    request.setAttribute("no", map.get("no"));
+                    request.setAttribute("authority", map.get("authority"));
                 }, () -> {
                     throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "未登录！");
                 });
