@@ -18,8 +18,8 @@ public class SuperManagerInterceptor implements HandlerInterceptor {
 
         String authority = (String) request.getAttribute("authority");
 
-        if (authority != User.Manager) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "无权限");
+        if (!(authority.equals(User.Super_Manager))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "无权限！");
         }
         return true;
     }

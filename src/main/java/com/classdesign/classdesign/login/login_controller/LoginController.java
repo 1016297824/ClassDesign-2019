@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletResponse;
+import java.awt.desktop.SystemSleepEvent;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,14 +34,14 @@ public class LoginController {
     private EncryptorComponent encryptorComponent;
 
     @PostMapping("/login")
-    public void login(@RequestBody User user, HttpServletResponse response) {
+    public void Login(@RequestBody User user, HttpServletResponse response) {
         Optional.ofNullable(userService.FindByNo(user.getNo()))
                 .or(() -> {
-                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户名不存在！");
+                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User name does not exist!");
                 })
                 .ifPresentOrElse(u -> {
                     if (!passwordEncoder.matches(user.getPassword(), u.getPassword())) {
-                        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "密码错误！");
+                        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "wrong password!");
                     }
 
                     Map map = Map.of("no", u.getNo(), "authority", u.getAuthority());
@@ -48,17 +49,17 @@ public class LoginController {
                     response.setHeader("token", token);
 
                     String role = null;
-                    if (u.getAuthority() == User.Super_Manager) {
+                    if (u.getAuthority().equals(User.Super_Manager)) {
                         role = SUPER_MANAGER_ROLE;
-                    } else if (u.getAuthority() == User.Manager) {
+                    } else if (u.getAuthority().equals(User.Manager)) {
                         role = MANAGER_ROLE;
-                    } else if (u.getAuthority() == User.Teacher) {
+                    } else if (u.getAuthority().equals(User.Teacher)) {
                         role = TEACHER_ROLE;
                     }
                     response.setHeader("role", role);
 
                 }, () -> {
-                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户名或密码错误");
+                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户名或密码错误！");
                 });
     }
 }
