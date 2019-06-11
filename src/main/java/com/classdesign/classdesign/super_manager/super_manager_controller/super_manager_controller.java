@@ -61,7 +61,6 @@ public class super_manager_controller {
         }
         System.out.println(res);
         List<User> users = userService.FindByAuthority(User.Manager);
-        /*JOptionPane.showMessageDialog(null, res);*/
         return Map.of("users", users,"res",res);
     }
 
