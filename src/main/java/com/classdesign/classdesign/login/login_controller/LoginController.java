@@ -37,11 +37,11 @@ public class LoginController {
     public void Login(@RequestBody User user, HttpServletResponse response) {
         Optional.ofNullable(userService.FindByNo(user.getNo()))
                 .or(() -> {
-                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User name does not exist!");
+                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "用户名不存在！");
                 })
                 .ifPresentOrElse(u -> {
                     if (!passwordEncoder.matches(user.getPassword(), u.getPassword())) {
-                        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "wrong password!");
+                        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "密码错误！");
                     }
 
                     Map map = Map.of("no", u.getNo(), "authority", u.getAuthority());

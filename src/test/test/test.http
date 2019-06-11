@@ -7,3 +7,14 @@ Content-Type: application/json
 }
 
 ###
+
+POST http://localhost:8080/api/super_manager/add
+token:0b249011bc97e77f2aab70ed51bc1592bac893675d2b4fbe3006b29b626c64ed7d4af5e8ea9ba36bfc44f0cc42253056fa1ec22dbfb5eeb86e92e2ca1b58cf498394b7a0b338e2f30dd6e4e7f7e180b3
+Content-Type: application/json
+
+{
+  "no": "10002",
+  "password": "123"
+}
+
+###

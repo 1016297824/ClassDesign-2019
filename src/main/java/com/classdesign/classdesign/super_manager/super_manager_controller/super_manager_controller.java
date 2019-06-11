@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -33,21 +31,10 @@ public class super_manager_controller {
         /*for (int i = 0; i < users.size(); i++) {
             System.out.println(users.get(i).getNo() + " " + users.get(i).getName());
         }*/
-        return Map.of("user", users);
+        return Map.of("users", users);
     }
 
-    @PostMapping("/main/deleted/{no}")
-    public Map SuperManagerDelete(@PathVariable String no) {
-        User user = userService.FindByNo(no);
-        userRepository.delete(user);
-        List<User> users = userService.FindByAuthority(User.Manager);
-        /*for (int i = 0; i < users.size(); i++) {
-            System.out.println(users.get(i).getNo() + " " + users.get(i).getName());
-        }*/
-        return Map.of("user", users);
-    }
-
-    @PostMapping("/main/add")
+    @PostMapping("/add")
     public Map SuperManagerAdd(@RequestBody User user) {
         String res = null;
         User user1 = userService.FindByNo(user.getNo());
@@ -72,8 +59,21 @@ public class super_manager_controller {
         } else {
             res = "输入编号和密码不能为空！";
         }
+        System.out.println(res);
         List<User> users = userService.FindByAuthority(User.Manager);
         /*JOptionPane.showMessageDialog(null, res);*/
-        return Map.of("user", users);
+        return Map.of("users", users,"res",res);
+    }
+
+    @PostMapping("/deleted/{no}")
+    public Map SuperManagerDelete(@PathVariable String no) {
+        User user = userService.FindByNo(no);
+        userRepository.delete(user);
+        String res="已删除！";
+        List<User> users = userService.FindByAuthority(User.Manager);
+        /*for (int i = 0; i < users.size(); i++) {
+            System.out.println(users.get(i).getNo() + " " + users.get(i).getName());
+        }*/
+        return Map.of("users",users,"res",res);
     }
 }

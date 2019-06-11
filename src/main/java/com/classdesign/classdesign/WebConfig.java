@@ -12,6 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Autowired
     private LoginInterceptor loginInterceptor;
+
     @Autowired
     private SuperManagerInterceptor superManagerInterceptor;
 
@@ -21,6 +22,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")
                 .excludePathPatterns("/api/login");
         registry.addInterceptor(superManagerInterceptor)
-                .addPathPatterns("/api/super_manager/**");
+                .addPathPatterns("/api/super_manager/main");
     }
 }
