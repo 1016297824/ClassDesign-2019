@@ -26,9 +26,7 @@ public class TeacherController {
 
     @GetMapping("/main/{no}")
     public Map TeacherMain(@PathVariable String no){
-        System.out.println(no);
         User user=userService.FindByNo(no);
-        System.out.println(user.getName());
         return Map.of("user", user);
     }
 }
