@@ -50,29 +50,43 @@ public class super_manager_controller {
                 user1.setPassword(passwordEncoder.encode(user.getPassword()));
                 userRepository.save(user1);
             }
-        } else if (user.getNo() != null && user.getPassword() != null) {
-            res = "已添加管理员！";
-            user.setAuthority(User.Manager);
-            String password = user.getPassword();
-            user.setPassword(passwordEncoder.encode(password));
-            userRepository.save(user);
         } else {
-            res = "输入编号和密码不能为空！";
+            if (user.getNo() != null && user.getPassword() != null) {
+                user.setAuthority(User.Manager);
+                String password = user.getPassword();
+                user.setPassword(passwordEncoder.encode(password));
+                userRepository.save(user);
+                res = "已添加管理员！";
+            } else {
+                res = "员工号和密码不能为空！";
+            }
         }
-        System.out.println(res);
+        /*System.out.println(res);*/
         List<User> users = userService.FindByAuthority(User.Manager);
-        return Map.of("users", users,"res",res);
+        return Map.of("users", users, "res", res);
     }
 
     @PostMapping("/deleted/{no}")
     public Map SuperManagerDelete(@PathVariable String no) {
         User user = userService.FindByNo(no);
         userRepository.delete(user);
-        String res="已删除！";
+        String res = "已删除！";
         List<User> users = userService.FindByAuthority(User.Manager);
         /*for (int i = 0; i < users.size(); i++) {
             System.out.println(users.get(i).getNo() + " " + users.get(i).getName());
         }*/
-        return Map.of("users",users,"res",res);
+        return Map.of("users", users, "res", res);
+    }
+
+    @PostMapping("/updata")
+    public Map SuperManagerUpdata(@RequestBody User user) {
+        User user1 = userService.FindByNo(user.getNo());
+        user1.setName(user.getName());
+        user1.setIntro(user.getIntro());
+        user1.setMobile(user.getMobile());
+        userRepository.save(user1);
+        String res = "已修改！";
+        List<User> users = userService.FindByAuthority(User.Manager);
+        return Map.of("users", users, "res", res);
     }
 }

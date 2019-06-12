@@ -26,7 +26,7 @@ public class InitService implements InitializingBean {
             user.setNo("10001");
             user.setPassword(passwordEncoder.encode("138992"));
             user.setName("张坤");
-            user.setIntro("管理所有其他管理员");
+            user.setIntro("超级管理员");
             user.setMobile("15546632665");
             userRepository.save(user);
         }
