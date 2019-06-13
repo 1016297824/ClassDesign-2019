@@ -28,6 +28,7 @@ public class User {
     private String intro;
     private String mobile;
     private String authority;
+    private int invigilate=0;
 
     public User(String no,String password,String name,String intro,String mobile,String authority) {
         this.no=no;

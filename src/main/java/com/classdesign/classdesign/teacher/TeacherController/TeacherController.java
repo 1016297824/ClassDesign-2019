@@ -5,11 +5,9 @@ import com.classdesign.classdesign.repository.UserRepository;
 import com.classdesign.classdesign.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -28,5 +26,17 @@ public class TeacherController {
     public Map TeacherMain(@PathVariable String no){
         User user=userService.FindByNo(no);
         return Map.of("user", user);
+    }
+
+    @PostMapping("/updata")
+    public Map SuperManagerUpdata(@RequestBody User user) {
+        User user1 = userService.FindByNo(user.getNo());
+        user1.setName(user.getName());
+        user1.setIntro(user.getIntro());
+        user1.setMobile(user.getMobile());
+        userRepository.save(user1);
+        String res = "已修改！";
+        User users = userService.FindByNo(user.getNo());
+        return Map.of("user", user, "res", res);
     }
 }
