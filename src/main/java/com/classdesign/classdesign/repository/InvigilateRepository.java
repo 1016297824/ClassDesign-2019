@@ -14,6 +14,6 @@ public interface InvigilateRepository extends CustomizedRepository<Invigilate, I
     @Query("select i from Invigilate i where i.no=:no")
     Invigilate FindByNO(@Param("no") String no);
 
-    /*@Query("from Invigilat")
-    List<Invigilate> FindAll();*/
+    @Query("from Invigilate i")
+    List<Invigilate> FindAll();
 }

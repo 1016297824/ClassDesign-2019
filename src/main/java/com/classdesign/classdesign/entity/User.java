@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -28,14 +29,17 @@ public class User {
     private String intro;
     private String mobile;
     private String authority;
-    private int invigilate=0;
+    private int invigilate = 0;
 
-    public User(String no,String password,String name,String intro,String mobile,String authority) {
-        this.no=no;
-        this.password=password;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<UserInvigilate> invigilates;
+
+    public User(String no, String password, String name, String intro, String mobile, String authority) {
+        this.no = no;
+        this.password = password;
         this.name = name;
-        this.intro=intro;
-        this.mobile=mobile;
-        this.authority=authority;
+        this.intro = intro;
+        this.mobile = mobile;
+        this.authority = authority;
     }
 }

@@ -2,8 +2,8 @@ package com.classdesign.classdesign.super_manager.super_manager_controller;
 
 import com.classdesign.classdesign.entity.User;
 import com.classdesign.classdesign.repository.UserRepository;
-import com.classdesign.classdesign.service.UserService;
 
+import com.classdesign.classdesign.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;

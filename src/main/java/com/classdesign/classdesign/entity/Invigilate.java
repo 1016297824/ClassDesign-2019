@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -31,15 +32,14 @@ public class Invigilate {
     private String no;
     private String course;
     private String place;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime startTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime endTime;
+
+    @OneToMany(mappedBy = "invigilate", fetch = FetchType.LAZY)
+    private List<UserInvigilate> user;
+
     private String status = noDistribution;
     private String receive = notReceive;
     private String send = notSend;
 
-    public Invigilate(String no) {
-        this.no = no;
-    }
 }
