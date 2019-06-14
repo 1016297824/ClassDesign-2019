@@ -18,7 +18,7 @@ public class InvigilateService {
         return invigilateRepository.FindByNO(no);
     }
 
-    public List<Invigilate> FindAll(){
+    /*public List<Invigilate> FindAll(){
         return invigilateRepository.FindAll();
-    }
+    }*/
 }
