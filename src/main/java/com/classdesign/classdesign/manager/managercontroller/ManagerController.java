@@ -1,7 +1,10 @@
 package com.classdesign.classdesign.manager.managercontroller;
 
+import com.classdesign.classdesign.entity.Invigilate;
 import com.classdesign.classdesign.entity.User;
+import com.classdesign.classdesign.repository.InvigilateRepository;
 import com.classdesign.classdesign.repository.UserRepository;
+import com.classdesign.classdesign.service.InvigilateService;
 import com.classdesign.classdesign.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,10 +25,18 @@ public class ManagerController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /*@Autowired
+    private InvigilateService invigilateService;
+
+    @Autowired
+    private InvigilateRepository invigilateRepository;*/
+
     @GetMapping("/main")
     public Map ManagerMain(){
+        /*List<Invigilate> invigilates= invigilateService.FindAll();*/
         List<User> users=userService.FindByAuthority(User.Teacher);
-        return Map.of("users",users);
+      /*  return Map.of("users",users,"invigilates",invigilates);*/
+        return Map.of("users", users);
     }
 
     @PostMapping("/add")
@@ -78,4 +89,17 @@ public class ManagerController {
         List<User> users = userService.FindByAuthority(User.Teacher);
         return Map.of("users", users, "res", res);
     }
+
+    /*@PostMapping
+    public Map InvigilateAdd(@RequestBody Invigilate invigilate){
+        String res=null;
+        Invigilate invigilate1=invigilateService.FindByNO(invigilate.getNo());
+        if(invigilate1!=null){
+            res="场次已存在！";
+        }else{
+            invigilateRepository.save(invigilate);
+        }
+        List<Invigilate> invigilates=invigilateService.FindAll();
+        return Map.of("invigilates", invigilates,"res",res);
+    }*/
 }
