@@ -34,6 +34,9 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<UserInvigilate> userInvigilates;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Mission> missions;
+
     public User(String no, String password, String name, String intro, String mobile, String authority) {
         this.no = no;
         this.password = password;

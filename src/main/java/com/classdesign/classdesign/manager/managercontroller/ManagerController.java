@@ -1,18 +1,24 @@
 package com.classdesign.classdesign.manager.managercontroller;
 
 import com.classdesign.classdesign.entity.Invigilate;
+import com.classdesign.classdesign.entity.Mission;
 import com.classdesign.classdesign.entity.User;
 import com.classdesign.classdesign.entity.UserInvigilate;
 import com.classdesign.classdesign.repository.InvigilateRepository;
+import com.classdesign.classdesign.repository.MissionRepository;
 import com.classdesign.classdesign.repository.UserInvigilateRepository;
 import com.classdesign.classdesign.repository.UserRepository;
 import com.classdesign.classdesign.service.InvigilateService;
+import com.classdesign.classdesign.service.MissionService;
 import com.classdesign.classdesign.service.UserInvigilateService;
 import com.classdesign.classdesign.service.UserService;
+import org.apache.catalina.Manager;
+import org.hibernate.validator.constraints.ParameterScriptAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -40,12 +46,19 @@ public class ManagerController {
     @Autowired
     private UserInvigilateRepository userInvigilateRepository;
 
+    @Autowired
+    private MissionService missionService;
+
+    @Autowired
+    private MissionRepository missionRepository;
+
     @GetMapping("/main")
     public Map ManagerMain() {
         List<User> users = userService.FindByAuthority(User.Teacher);
         List<Invigilate> invigilates = invigilateService.FindAll();
-        List<UserInvigilate> userInvigilates=userInvigilateRepository.findAll();
-        return Map.of("users", users, "invigilates", invigilates,"userinvigilates",userInvigilates);
+        List<UserInvigilate> userInvigilates = userInvigilateRepository.findAll();
+        List<Mission> missions = missionService.FindAll();
+        return Map.of("users", users, "invigilates", invigilates, "userinvigilates", userInvigilates, "missions", missions);
     }
 
     @PostMapping("/add")
@@ -78,14 +91,13 @@ public class ManagerController {
     @PostMapping("/deleted/{no}")
     public Map ManagerDelete(@PathVariable String no) {
         User user = userService.FindByNo(no);
-        List<UserInvigilate> userInvigilates=userInvigilateService.FindUserInvigilateByUser(user);
+        List<UserInvigilate> userInvigilates = userInvigilateService.FindUserInvigilateByUser(user);
         userInvigilateRepository.deleteAll(userInvigilates);
+        List<Mission> missions = missionService.FindMissionByUser(user);
+        missionRepository.deleteAll(missions);
         userRepository.delete(user);
         String res = "已删除！";
         List<User> users = userService.FindByAuthority(User.Teacher);
-        /*for (int i = 0; i < users.size(); i++) {
-            System.out.println(users.get(i).getNo() + " " + users.get(i).getName());
-        }*/
         return Map.of("users", users, "res", res);
     }
 
@@ -123,7 +135,7 @@ public class ManagerController {
     @PostMapping("/deletedinvigilate/{no}")
     public Map InvigilateDelete(@PathVariable String no) {
         Invigilate invigilate = invigilateService.FindByNO(no);
-        List<UserInvigilate> userInvigilates=userInvigilateService.FindUserInvigilateByInvigilate(invigilate);
+        List<UserInvigilate> userInvigilates = userInvigilateService.FindUserInvigilateByInvigilate(invigilate);
         userInvigilateRepository.deleteAll(userInvigilates);
         invigilateRepository.delete(invigilate);
         String res = "已删除！";
@@ -157,33 +169,33 @@ public class ManagerController {
         String res = "未发现冲突！";
         for (int i = 0; i < userInvigilates.size(); i++) {
             if (userInvigilates.get(i).getInvigilate().getStartTime().equals(invigilate1.getStartTime())) {
-                res="发现冲突:一个老师同时有两个或两个以上监考！";
+                res = "发现冲突:一个老师同时有两个或两个以上监考！";
             }
         }
-        return Map.of("res",res);
+        return Map.of("res", res);
     }
 
     @PostMapping("/isdistributeinvigilate/{no}")
     public Map IsDistributeInvigilate(@PathVariable String no, @RequestBody Invigilate invigilate) {
         User user = userService.FindByNo(no);
-        user.setInvigilate(user.getInvigilate()+1);
+        user.setInvigilate(user.getInvigilate() + 1);
 
         Invigilate invigilate1 = invigilateService.FindByNO(invigilate.getNo());
         invigilate1.setStatus(Invigilate.isDistribution);
 
-        UserInvigilate userInvigilate=new UserInvigilate();
+        UserInvigilate userInvigilate = new UserInvigilate();
 
         userInvigilate.setUser(user);
         userInvigilate.setInvigilate(invigilate1);
         userInvigilateRepository.save(userInvigilate);
-        String res="已分配！";
+        String res = "已分配！";
         List<User> users = userService.FindByAuthority(User.Teacher);
-        return Map.of("users",users,"res",res);
+        return Map.of("users", users, "res", res);
     }
 
     @PostMapping("/redistribute")
-    public Map RedistributeInvigilate(@RequestBody Invigilate invigilate){
-        List<UserInvigilate> userInvigilates=userInvigilateService.FindUserInvigilateByInvigilate(invigilate);
+    public Map RedistributeInvigilate(@RequestBody Invigilate invigilate) {
+        List<UserInvigilate> userInvigilates = userInvigilateService.FindUserInvigilateByInvigilate(invigilate);
         userInvigilateRepository.deleteAll(userInvigilates);
         invigilate.setStatus(Invigilate.notDistribution);
         invigilate.setSend(Invigilate.notSend);
@@ -191,8 +203,43 @@ public class ManagerController {
         invigilateRepository.save(invigilate);
 
         List<Invigilate> invigilates = invigilateService.FindAll();
-        List<UserInvigilate> userInvigilates1=userInvigilateRepository.findAll();
-        String res="已重置！";
-        return Map.of("invigilates", invigilates,"userinvigilates",userInvigilates1,"res",res);
+        List<UserInvigilate> userInvigilates1 = userInvigilateRepository.findAll();
+        String res = "已重置！";
+        return Map.of("invigilates", invigilates, "userinvigilates", userInvigilates1, "res", res);
+    }
+
+    @PostMapping("/addmission")
+    public Map MissionAdd(@RequestBody Mission mission) {
+        String res = null;
+        Mission mission1 = missionService.FindByNO(mission.getNo());
+        if (mission1 != null) {
+            res = "编号已存在！";
+        } else {
+            missionRepository.save(mission);
+            res = "已添任务！";
+        }
+        List<Mission> missions = missionService.FindAll();
+        return Map.of("missions", missions, "res", res);
+    }
+
+    @PostMapping("/deletedmission/{no}")
+    public Map MissionDelete(@PathVariable String no) {
+        Mission mission = missionService.FindByNO(no);
+        missionRepository.delete(mission);
+        String res = "已删除！";
+        List<Mission> missions = missionService.FindAll();
+        return Map.of("missions", missions, "res", res);
+    }
+
+    @PostMapping("/distributemission/{no}")
+    public Map DistributeMission(@PathVariable String no, @RequestBody Mission mission) {
+        User user = userService.FindByNo(no);
+
+        Mission mission1 = missionService.FindByNO(mission.getNo());
+        mission1.setUser(user);
+
+        missionRepository.save(mission1);
+        String res="已分配";
+        return Map.of("res",res);
     }
 }

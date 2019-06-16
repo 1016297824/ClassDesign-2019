@@ -17,7 +17,7 @@ public class TimerService {
     @Autowired
     private InvigilateRepository invigilateRepository;
 
-    @Scheduled(cron = "*/5 * * * * ?")
+    //@Scheduled(cron = "*/5 * * * * ?")
     public void InvigilateSend() {
         List<Invigilate> invigilates = invigilateService.FindAll();
         int now = LocalDateTime.now().getDayOfMonth();
