@@ -44,10 +44,8 @@ public class ManagerController {
     public Map ManagerMain() {
         List<User> users = userService.FindByAuthority(User.Teacher);
         List<Invigilate> invigilates = invigilateService.FindAll();
-        /*for (int i = 0; i < invigilates.size(); i++) {
-            System.out.println(invigilates.get(i).getNo());
-        }*/
-        return Map.of("users", users, "invigilates", invigilates);
+        List<UserInvigilate> userInvigilates=userInvigilateRepository.findAll();
+        return Map.of("users", users, "invigilates", invigilates,"userinvigilates",userInvigilates);
     }
 
     @PostMapping("/add")
@@ -168,6 +166,7 @@ public class ManagerController {
     @PostMapping("/isdistributeinvigilate/{no}")
     public Map IsDistributeInvigilate(@PathVariable String no, @RequestBody Invigilate invigilate) {
         User user = userService.FindByNo(no);
+        user.setInvigilate(user.getInvigilate()+1);
 
         Invigilate invigilate1 = invigilateService.FindByNO(invigilate.getNo());
         invigilate1.setStatus(Invigilate.isDistribution);
@@ -178,6 +177,22 @@ public class ManagerController {
         userInvigilate.setInvigilate(invigilate1);
         userInvigilateRepository.save(userInvigilate);
         String res="已分配！";
-        return Map.of("res",res);
+        List<User> users = userService.FindByAuthority(User.Teacher);
+        return Map.of("users",users,"res",res);
+    }
+
+    @PostMapping("/redistribute")
+    public Map RedistributeInvigilate(@RequestBody Invigilate invigilate){
+        List<UserInvigilate> userInvigilates=userInvigilateService.FindUserInvigilateByInvigilate(invigilate);
+        userInvigilateRepository.deleteAll(userInvigilates);
+        invigilate.setStatus(Invigilate.notDistribution);
+        invigilate.setSend(Invigilate.notSend);
+        invigilate.setReceive(Invigilate.notReceive);
+        invigilateRepository.save(invigilate);
+
+        List<Invigilate> invigilates = invigilateService.FindAll();
+        List<UserInvigilate> userInvigilates1=userInvigilateRepository.findAll();
+        String res="已重置！";
+        return Map.of("invigilates", invigilates,"userinvigilates",userInvigilates1,"res",res);
     }
 }

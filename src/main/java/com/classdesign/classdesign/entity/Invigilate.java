@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Invigilate {
 
-    public static final String noDistribution = "未分配";
+    public static final String notDistribution = "未分配";
     public static final String isDistribution = "已分配";
     public static final String done = "已完成";
 
@@ -38,7 +38,7 @@ public class Invigilate {
     @OneToMany(mappedBy = "invigilate", fetch = FetchType.LAZY)
     private List<UserInvigilate> userInvigilates;
 
-    private String status = noDistribution;
+    private String status = notDistribution;
     private String receive = notReceive;
     private String send = notSend;
 
