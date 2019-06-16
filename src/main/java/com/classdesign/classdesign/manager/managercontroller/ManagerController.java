@@ -102,7 +102,7 @@ public class ManagerController {
     }
 
     @PostMapping("/updata")
-    public Map SuperManagerUpdata(@RequestBody User user) {
+    public Map ManagerUpdata(@RequestBody User user) {
         User user1 = userService.FindByNo(user.getNo());
         user1.setName(user.getName());
         user1.setIntro(user.getIntro());
@@ -162,7 +162,7 @@ public class ManagerController {
     }
 
     @PostMapping("/distributeinvigilate/{no}")
-    public Map DistributeInvigilate(@PathVariable String no, @RequestBody Invigilate invigilate) {
+    public Map InvigilateDistribute(@PathVariable String no, @RequestBody Invigilate invigilate) {
         User user = userService.FindByNo(no);
         Invigilate invigilate1 = invigilateService.FindByNO(invigilate.getNo());
         List<UserInvigilate> userInvigilates = userInvigilateService.FindUserInvigilateByUser(user);
@@ -176,7 +176,7 @@ public class ManagerController {
     }
 
     @PostMapping("/isdistributeinvigilate/{no}")
-    public Map IsDistributeInvigilate(@PathVariable String no, @RequestBody Invigilate invigilate) {
+    public Map InvigilateIsDistribute(@PathVariable String no, @RequestBody Invigilate invigilate) {
         User user = userService.FindByNo(no);
         user.setInvigilate(user.getInvigilate() + 1);
 
@@ -194,7 +194,7 @@ public class ManagerController {
     }
 
     @PostMapping("/redistribute")
-    public Map RedistributeInvigilate(@RequestBody Invigilate invigilate) {
+    public Map InvigilateRedistribute(@RequestBody Invigilate invigilate) {
         List<UserInvigilate> userInvigilates = userInvigilateService.FindUserInvigilateByInvigilate(invigilate);
         userInvigilateRepository.deleteAll(userInvigilates);
         invigilate.setStatus(Invigilate.notDistribution);
@@ -232,14 +232,50 @@ public class ManagerController {
     }
 
     @PostMapping("/distributemission/{no}")
-    public Map DistributeMission(@PathVariable String no, @RequestBody Mission mission) {
+    public Map MissionDistribute(@PathVariable String no, @RequestBody Mission mission) {
+        String res = null;
         User user = userService.FindByNo(no);
 
         Mission mission1 = missionService.FindByNO(mission.getNo());
-        mission1.setUser(user);
+        if (mission1.getUser() != null) {
+            res = "该任务已被分配！";
+        } else {
+            mission1.setUser(user);
+            missionRepository.save(mission1);
+            res = "已分配！";
+        }
+        return Map.of("res", res);
+    }
 
-        missionRepository.save(mission1);
-        String res="已分配";
-        return Map.of("res",res);
+    @PostMapping("/closemission/{no}")
+    public Map MissionClose(@PathVariable String no) {
+
+        String res = null;
+        Mission mission = missionService.FindByNO(no);
+
+        mission.setModify(Mission.notModify);
+        missionRepository.save(mission);
+        res = "此任务已关闭！";
+
+        return Map.of("res", res);
+    }
+
+    @PostMapping("/updatamission")
+    public Map MissionUpdata(@RequestBody Mission mission) {
+        String res=null;
+        Mission mission1 = missionService.FindByNO(mission.getNo());
+
+        if (mission1.getModify().equals(Mission.isModify)) {
+            mission1.setName(mission.getName());
+            mission1.setContent(mission.getContent());
+            mission1.setEndTime(mission.getEndTime());
+            missionRepository.save(mission1);
+            res="已修改";
+        } else {
+            res="该任务已关闭，不可修改！";
+        }
+
+        List<Mission> missions = missionService.FindAll();
+        return Map.of("missions", missions, "res", res);
     }
 }
