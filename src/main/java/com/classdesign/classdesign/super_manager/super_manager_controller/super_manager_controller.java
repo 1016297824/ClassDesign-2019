@@ -45,7 +45,7 @@ public class super_manager_controller {
             } else if (user1.getAuthority().equals(User.Manager)) {
                 res = "管理员已存在！";
             } else if (user1.getAuthority().equals(User.Teacher)) {
-                res = "已添加管理员！";
+                res = "已添加该教师为管理员！";
                 user1.setAuthority(User.Manager);
                 user1.setPassword(passwordEncoder.encode(user.getPassword()));
                 userRepository.save(user1);

@@ -2,9 +2,12 @@ package com.classdesign.classdesign.manager.managercontroller;
 
 import com.classdesign.classdesign.entity.Invigilate;
 import com.classdesign.classdesign.entity.User;
+import com.classdesign.classdesign.entity.UserInvigilate;
 import com.classdesign.classdesign.repository.InvigilateRepository;
+import com.classdesign.classdesign.repository.UserInvigilateRepository;
 import com.classdesign.classdesign.repository.UserRepository;
 import com.classdesign.classdesign.service.InvigilateService;
+import com.classdesign.classdesign.service.UserInvigilateService;
 import com.classdesign.classdesign.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +33,12 @@ public class ManagerController {
 
     @Autowired
     private InvigilateRepository invigilateRepository;
+
+    @Autowired
+    private UserInvigilateService userInvigilateService;
+
+    @Autowired
+    private UserInvigilateRepository userInvigilateRepository;
 
     @GetMapping("/main")
     public Map ManagerMain() {
@@ -71,6 +80,8 @@ public class ManagerController {
     @PostMapping("/deleted/{no}")
     public Map ManagerDelete(@PathVariable String no) {
         User user = userService.FindByNo(no);
+        List<UserInvigilate> userInvigilates=userInvigilateService.FindUserInvigilateByUser(user);
+        userInvigilateRepository.deleteAll(userInvigilates);
         userRepository.delete(user);
         String res = "已删除！";
         List<User> users = userService.FindByAuthority(User.Teacher);
@@ -99,11 +110,12 @@ public class ManagerController {
         if (invigilate1 != null) {
             res = "场次已存在！";
         } else {
-            if (invigilate.getNo() != null && invigilate.getCourse() != null && invigilate.getPlace() != null && invigilate.getEndTime() != null && invigilate.getStartTime() != null){
+            if (invigilate.getNo() != null && invigilate.getCourse() != null && invigilate.getPlace() != null && invigilate.getStartTime() != null) {
+                invigilate.setEndTime(invigilate.getStartTime().minusHours(-2));
                 invigilateRepository.save(invigilate);
-                res="已添加监考！";
-            }else {
-                res="填写的信息不全！";
+                res = "已添加监考！";
+            } else {
+                res = "填写的信息不全！";
             }
         }
         List<Invigilate> invigilates = invigilateService.FindAll();
@@ -112,7 +124,9 @@ public class ManagerController {
 
     @PostMapping("/deletedinvigilate/{no}")
     public Map InvigilateDelete(@PathVariable String no) {
-        Invigilate invigilate=invigilateService.FindByNO(no);
+        Invigilate invigilate = invigilateService.FindByNO(no);
+        List<UserInvigilate> userInvigilates=userInvigilateService.FindUserInvigilateByInvigilate(invigilate);
+        userInvigilateRepository.deleteAll(userInvigilates);
         invigilateRepository.delete(invigilate);
         String res = "已删除！";
         List<Invigilate> invigilates = invigilateService.FindAll();
@@ -120,20 +134,50 @@ public class ManagerController {
     }
 
     @PostMapping("/updatainvigilate")
-    public Map SuperManagerUpdata(@RequestBody Invigilate invigilate) {
-        String res=null;
+    public Map InvigilateUpdata(@RequestBody Invigilate invigilate) {
+        String res = null;
         Invigilate invigilate1 = invigilateService.FindByNO(invigilate.getNo());
-        if (invigilate.getNo() != null && invigilate.getCourse() != null && invigilate.getPlace() != null && invigilate.getEndTime() != null && invigilate.getStartTime() != null){
-           invigilate1.setCourse(invigilate.getCourse());
-           invigilate1.setPlace(invigilate.getPlace());
-           invigilate1.setStartTime(invigilate.getStartTime());
-           invigilate1.setEndTime(invigilate.getEndTime());
-           invigilateRepository.save(invigilate1);
-           res="已修改！";
-        }else {
-            res="填写的信息不全！";
+        if (invigilate.getNo() != null && invigilate.getCourse() != null && invigilate.getPlace() != null && invigilate.getStartTime() != null) {
+            invigilate1.setCourse(invigilate.getCourse());
+            invigilate1.setPlace(invigilate.getPlace());
+            invigilate1.setStartTime(invigilate.getStartTime());
+            invigilate.setEndTime(invigilate.getStartTime().minusHours(-2));
+            invigilateRepository.save(invigilate1);
+            res = "已修改！";
+        } else {
+            res = "填写的信息不全！";
         }
         List<Invigilate> invigilates = invigilateService.FindAll();
         return Map.of("invigilates", invigilates, "res", res);
+    }
+
+    @PostMapping("/distributeinvigilate/{no}")
+    public Map DistributeInvigilate(@PathVariable String no, @RequestBody Invigilate invigilate) {
+        User user = userService.FindByNo(no);
+        Invigilate invigilate1 = invigilateService.FindByNO(invigilate.getNo());
+        List<UserInvigilate> userInvigilates = userInvigilateService.FindUserInvigilateByUser(user);
+        String res = "未发现冲突！";
+        for (int i = 0; i < userInvigilates.size(); i++) {
+            if (userInvigilates.get(i).getInvigilate().getStartTime().equals(invigilate1.getStartTime())) {
+                res="发现冲突:一个老师同时有两个或两个以上监考！";
+            }
+        }
+        return Map.of("res",res);
+    }
+
+    @PostMapping("/isdistributeinvigilate/{no}")
+    public Map IsDistributeInvigilate(@PathVariable String no, @RequestBody Invigilate invigilate) {
+        User user = userService.FindByNo(no);
+
+        Invigilate invigilate1 = invigilateService.FindByNO(invigilate.getNo());
+        invigilate1.setStatus(Invigilate.isDistribution);
+
+        UserInvigilate userInvigilate=new UserInvigilate();
+
+        userInvigilate.setUser(user);
+        userInvigilate.setInvigilate(invigilate1);
+        userInvigilateRepository.save(userInvigilate);
+        String res="已分配！";
+        return Map.of("res",res);
     }
 }

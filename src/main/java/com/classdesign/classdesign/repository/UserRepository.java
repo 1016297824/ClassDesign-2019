@@ -14,6 +14,6 @@ public interface UserRepository extends CustomizedRepository<User, Integer> {
     @Query("select u from User u where u.no=:no")
     User FindByNO(@Param("no") String no);
 
-    @Query("select u from User u where u.authority=:authority")
+    @Query("select u from User u where u.authority=:authority order by u.invigilate")
     List<User> FindByAuthority(@Param("authority") String authority);
 }

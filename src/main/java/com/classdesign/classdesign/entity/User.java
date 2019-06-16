@@ -32,7 +32,7 @@ public class User {
     private int invigilate = 0;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<UserInvigilate> invigilates;
+    private List<UserInvigilate> userInvigilates;
 
     public User(String no, String password, String name, String intro, String mobile, String authority) {
         this.no = no;

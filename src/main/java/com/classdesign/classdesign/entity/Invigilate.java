@@ -36,7 +36,7 @@ public class Invigilate {
     private LocalDateTime endTime;
 
     @OneToMany(mappedBy = "invigilate", fetch = FetchType.LAZY)
-    private List<UserInvigilate> user;
+    private List<UserInvigilate> userInvigilates;
 
     private String status = noDistribution;
     private String receive = notReceive;

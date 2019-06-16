@@ -36,6 +36,6 @@ public class TeacherController {
         userRepository.save(user1);
         String res = "已修改！";
         User users = userService.FindByNo(user.getNo());
-        return Map.of("user", user, "res", res);
+        return Map.of("users", users, "res", res);
     }
 }
