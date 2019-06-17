@@ -19,4 +19,7 @@ public interface UserInvigilateRepository extends CustomizedRepository<UserInvig
 
     @Query("from UserInvigilate ui where ui.invigilate=:invigilate")
     List<UserInvigilate> FindUserInvigilateByInvigilate(@Param("invigilate") Invigilate invigilate);
+
+    @Query("from UserInvigilate ui order by ui.invigilate")
+    List<UserInvigilate> FindAll();
 }

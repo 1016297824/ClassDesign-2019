@@ -18,6 +18,7 @@ public class UserInvigilate {
 
     @ManyToOne
     private User user;
+
     @ManyToOne
     private Invigilate invigilate;
 }

@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -16,10 +17,6 @@ public class Mission {
     public static final String isModify = "可修改";
     public static final String notModify = "不可修改";
 
-    public static final String isReplay = "已回复";
-    public static final String notReplay = "未回复";
-    public static final String notTime = "未按时回复";
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -27,13 +24,10 @@ public class Mission {
     private String no;
     private String name;
     private String content;
-    private String replay;
     private LocalDateTime endTime;
-    private LocalDateTime completeTime;
 
-    @ManyToOne
-    private User user;
+    @OneToMany(mappedBy = "mission", fetch = FetchType.LAZY)
+    private List<UserMission> userMissions;
 
     private String modify = Mission.isModify;
-    private String status = Mission.notReplay;
 }

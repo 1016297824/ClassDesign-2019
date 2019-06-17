@@ -19,7 +19,4 @@ public interface MissionRepository extends CustomizedRepository<Mission, Integer
 
     @Query("from Mission m")
     List<Mission> FindAll();
-
-    @Query("from Mission m where m.user=:user")
-    List<Mission> FindMissionByUser(@Param("user") User user);
 }

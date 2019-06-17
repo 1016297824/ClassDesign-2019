@@ -35,7 +35,7 @@ public class User {
     private List<UserInvigilate> userInvigilates;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Mission> missions;
+    private List<UserMission> userMissions;
 
     public User(String no, String password, String name, String intro, String mobile, String authority) {
         this.no = no;

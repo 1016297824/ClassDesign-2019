@@ -25,8 +25,4 @@ public class MissionService {
     public List<Mission> FindAll(){
         return missionRepository.FindAll();
     }
-
-    public List<Mission> FindMissionByUser(User user){
-        return missionRepository.FindMissionByUser(user);
-    }
 }

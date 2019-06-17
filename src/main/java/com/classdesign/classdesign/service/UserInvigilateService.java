@@ -23,4 +23,8 @@ public class UserInvigilateService {
     public List<UserInvigilate> FindUserInvigilateByInvigilate(Invigilate invigilate){
         return userInvigilateRepository.FindUserInvigilateByInvigilate(invigilate);
     }
+
+    public List<UserInvigilate> FindAll(){
+        return userInvigilateRepository.FindAll();
+    }
 }

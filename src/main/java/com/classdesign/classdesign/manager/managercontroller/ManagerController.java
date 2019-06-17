@@ -1,17 +1,8 @@
 package com.classdesign.classdesign.manager.managercontroller;
 
-import com.classdesign.classdesign.entity.Invigilate;
-import com.classdesign.classdesign.entity.Mission;
-import com.classdesign.classdesign.entity.User;
-import com.classdesign.classdesign.entity.UserInvigilate;
-import com.classdesign.classdesign.repository.InvigilateRepository;
-import com.classdesign.classdesign.repository.MissionRepository;
-import com.classdesign.classdesign.repository.UserInvigilateRepository;
-import com.classdesign.classdesign.repository.UserRepository;
-import com.classdesign.classdesign.service.InvigilateService;
-import com.classdesign.classdesign.service.MissionService;
-import com.classdesign.classdesign.service.UserInvigilateService;
-import com.classdesign.classdesign.service.UserService;
+import com.classdesign.classdesign.entity.*;
+import com.classdesign.classdesign.repository.*;
+import com.classdesign.classdesign.service.*;
 import org.apache.catalina.Manager;
 import org.hibernate.validator.constraints.ParameterScriptAssert;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,13 +43,20 @@ public class ManagerController {
     @Autowired
     private MissionRepository missionRepository;
 
+    @Autowired
+    private UserMissionService userMissionService;
+
+    @Autowired
+    private UserMissionRepository userMissionRepository;
+
     @GetMapping("/main")
     public Map ManagerMain() {
         List<User> users = userService.FindByAuthority(User.Teacher);
         List<Invigilate> invigilates = invigilateService.FindAll();
-        List<UserInvigilate> userInvigilates = userInvigilateRepository.findAll();
+        List<UserInvigilate> userInvigilates = userInvigilateService.FindAll();
         List<Mission> missions = missionService.FindAll();
-        return Map.of("users", users, "invigilates", invigilates, "userinvigilates", userInvigilates, "missions", missions);
+        List<UserMission> userMissions=userMissionService.FindAll();
+        return Map.of("users", users, "invigilates", invigilates, "userinvigilates", userInvigilates, "missions", missions,"usermissions",userMissions);
     }
 
     @PostMapping("/add")
@@ -93,8 +91,8 @@ public class ManagerController {
         User user = userService.FindByNo(no);
         List<UserInvigilate> userInvigilates = userInvigilateService.FindUserInvigilateByUser(user);
         userInvigilateRepository.deleteAll(userInvigilates);
-        List<Mission> missions = missionService.FindMissionByUser(user);
-        missionRepository.deleteAll(missions);
+        List<UserMission> userMissions = userMissionService.FindUserMissionByUser(user);
+        userMissionRepository.deleteAll(userMissions);
         userRepository.delete(user);
         String res = "已删除！";
         List<User> users = userService.FindByAuthority(User.Teacher);
@@ -190,7 +188,9 @@ public class ManagerController {
         userInvigilateRepository.save(userInvigilate);
         String res = "已分配！";
         List<User> users = userService.FindByAuthority(User.Teacher);
-        return Map.of("users", users, "res", res);
+        List<Invigilate> invigilates = invigilateService.FindAll();
+        List<UserInvigilate> userInvigilates = userInvigilateService.FindAll();
+        return Map.of("users", users, "invigilates", invigilates, "userinvigilates", userInvigilates, "res", res);
     }
 
     @PostMapping("/redistribute")
@@ -225,26 +225,36 @@ public class ManagerController {
     @PostMapping("/deletedmission/{no}")
     public Map MissionDelete(@PathVariable String no) {
         Mission mission = missionService.FindByNO(no);
+        List<UserMission> userMissions=userMissionService.FindUserMissionByMission(mission);
+        userMissionRepository.deleteAll(userMissions);
         missionRepository.delete(mission);
         String res = "已删除！";
         List<Mission> missions = missionService.FindAll();
-        return Map.of("missions", missions, "res", res);
+        List<UserMission> userMissions1 = userMissionService.FindAll();
+        return Map.of("missions", missions, "usermissions",userMissions1,"res", res);
     }
 
-    @PostMapping("/distributemission/{no}")
-    public Map MissionDistribute(@PathVariable String no, @RequestBody Mission mission) {
+    @PostMapping("/distributemission")
+    public Map MissionDistribute(@RequestBody Mission mission) {
         String res = null;
-        User user = userService.FindByNo(no);
+
+        List<User> users = userService.FindByAuthority(User.Teacher);
 
         Mission mission1 = missionService.FindByNO(mission.getNo());
-        if (mission1.getUser() != null) {
-            res = "该任务已被分配！";
+
+        if (!userMissionService.FindUserMissionByMission(mission1).isEmpty()) {
+            res = "请勿重复发布任务！";
         } else {
-            mission1.setUser(user);
-            missionRepository.save(mission1);
-            res = "已分配！";
+            for (int i = 0; i < users.size(); i++) {
+                UserMission userMission = new UserMission();
+                userMission.setUser(users.get(i));
+                userMission.setMission(mission1);
+                userMissionRepository.save(userMission);
+            }
+            res = "任务已发布！";
         }
-        return Map.of("res", res);
+        List<UserMission> userMissions = userMissionService.FindAll();
+        return Map.of("usermissions", userMissions, "res", res);
     }
 
     @PostMapping("/closemission/{no}")
@@ -262,7 +272,7 @@ public class ManagerController {
 
     @PostMapping("/updatamission")
     public Map MissionUpdata(@RequestBody Mission mission) {
-        String res=null;
+        String res = null;
         Mission mission1 = missionService.FindByNO(mission.getNo());
 
         if (mission1.getModify().equals(Mission.isModify)) {
@@ -270,9 +280,9 @@ public class ManagerController {
             mission1.setContent(mission.getContent());
             mission1.setEndTime(mission.getEndTime());
             missionRepository.save(mission1);
-            res="已修改";
+            res = "已修改";
         } else {
-            res="该任务已关闭，不可修改！";
+            res = "该任务已关闭，不可修改！";
         }
 
         List<Mission> missions = missionService.FindAll();
