@@ -1,9 +1,11 @@
 package com.classdesign.classdesign.super_manager.super_manager_controller;
 
 import com.classdesign.classdesign.entity.User;
-import com.classdesign.classdesign.repository.UserRepository;
+import com.classdesign.classdesign.entity.UserInvigilate;
+import com.classdesign.classdesign.entity.UserMission;
+import com.classdesign.classdesign.repository.*;
 
-import com.classdesign.classdesign.service.UserService;
+import com.classdesign.classdesign.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,18 @@ public class super_manager_controller {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserInvigilateService userInvigilateService;
+
+    @Autowired
+    private UserInvigilateRepository userInvigilateRepository;
+
+    @Autowired
+    private UserMissionService userMissionService;
+
+    @Autowired
+    private UserMissionRepository userMissionRepository;
 
     @GetMapping("/main")
     public Map SuperManagerMain() {
@@ -47,7 +61,6 @@ public class super_manager_controller {
             } else if (user1.getAuthority().equals(User.Teacher)) {
                 res = "已添加该教师为管理员！";
                 user1.setAuthority(User.Manager);
-                user1.setPassword(passwordEncoder.encode(user.getPassword()));
                 userRepository.save(user1);
             }
         } else {
@@ -69,6 +82,10 @@ public class super_manager_controller {
     @PostMapping("/deleted/{no}")
     public Map SuperManagerDelete(@PathVariable String no) {
         User user = userService.FindByNo(no);
+        List<UserInvigilate> userInvigilates = userInvigilateService.FindUserInvigilateByUser(user);
+        userInvigilateRepository.deleteAll(userInvigilates);
+        List<UserMission> userMissions = userMissionService.FindUserMissionByUser(user);
+        userMissionRepository.deleteAll(userMissions);
         userRepository.delete(user);
         String res = "已删除！";
         List<User> users = userService.FindByAuthority(User.Manager);
